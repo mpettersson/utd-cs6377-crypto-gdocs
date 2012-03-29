@@ -1,0 +1,14 @@
+{
+  "name": "CS 6377: Crypto Google Docs",
+  "version": "1.0.0",
+  "icons": {
+
+  },
+  "description": "An extension that helps encrypt secret data in Google Docs.",
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+   
+  ]
+}

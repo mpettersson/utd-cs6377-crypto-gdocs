@@ -1,28 +1,32 @@
-function initCryptoGdocs(){
-	$('#linkEncrypt').click(encryptClick);
-	$('#linkDecrypt').click(decryptClick);
-	$('#linkGenKey').click(generateKey);
+/*
+ * These are the crypto functions that we wrote to actually
+ * perform our AES encryption and HMAC
+ */
 
-	var ctrField = $('#ctr');
+var _crypto = {}
 
-	if (ctrField.val() === ""){
-		var rand = new Int32Array(1);
-		window.crypto.getRandomValues(rand);
-		ctrField.val(rand[0]);
-	}
+_crypto.random = {};
+
+_crypto.random.counter = function(){
+	var rand = new Int32Array(1);
+	window.crypto.getRandomValues(rand);
+	return rand[0];
 }
 
-function encryptClick(){	
+_crypto.random.key = function(){
+	var key = new Int32Array(4);
+	window.crypto.getRandomValues(key);
+
+	var keyString = sjcl.codec.base64.fromBits(key);
+	return keyString;
+}
+
+_crypto.encrypt = function(keystr,ctr,textstr){	
 
 	var cryptotext = [];
 
-	// Grab the form field values
-	var keyString = $('#key').val();
-	var ctr = $('#ctr').val();
-	var plaintextString = $('#pt').val();
-	
 	// Convert plaintext to bit array
-	var plaintext = sjcl.codec.utf8String.toBits(plaintextString);
+	var plaintext = sjcl.codec.utf8String.toBits(textstr);
 	
 	// Workaround to fix issues with 64-bit numbers showing up when converting from utf8 to bits
 	// Essentially, the XOR with 0 flattens everything to 32-bit numbers so HMAC doesn't get angry
@@ -32,7 +36,7 @@ function encryptClick(){
 	});
 
 	// Convert the key to bits and initialize AES
-	var key = sjcl.codec.base64.toBits(keyString);
+	var key = sjcl.codec.base64.toBits(keystr);
 	var aes = new sjcl.cipher.aes(key);
 
 	// Calculate the amount of padding on the end of the cryptotext 
@@ -68,23 +72,17 @@ function encryptClick(){
 	
 	// Convert our cryptoresult to Base 64
 	var cryptoresult = sjcl.codec.base64.fromBits(cryptotext);
-
-	// Put the value in the cryptotext box.
-	$('#ct').val(cryptoresult);
+	
+	return cryptoresult;
 }
 
-function decryptClick(){	
+_crypto.decrypt = function(keystr, ctr, cryptostr){	
 
 	var cryptosource = [];
 
-	// Grab the form field values
-	var keyString = $('#key').val();
-	var ctr = $('#ctr').val();
-	var cryptotextString = $('#ct').val();
-
 	// Convert plain text and key to bit arrays
-	var cryptotext = sjcl.codec.base64.toBits(cryptotextString);
-	var key = sjcl.codec.base64.toBits(keyString);
+	var cryptotext = sjcl.codec.base64.toBits(cryptostr);
+	var key = sjcl.codec.base64.toBits(keystr);
 	var aes = new sjcl.cipher.aes(key);
 
 	// For each group of four blocks in our cryptosource...
@@ -119,15 +117,6 @@ function decryptClick(){
 
 	cryptosource.splice(0,1);
 
-	var cryptotext = sjcl.codec.utf8String.fromBits(cryptosource);
-
-	$('#pt').val(cryptotext);	
-}
-
-function generateKey(){
-	var key = new Int32Array(4);
-	window.crypto.getRandomValues(key);
-
-	var keyString = sjcl.codec.base64.fromBits(key);
-	$('#key').val(keyString);
+	var plaintext = sjcl.codec.utf8String.fromBits(cryptosource);
+	return plaintext;
 }

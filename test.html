@@ -1,0 +1,33 @@
+<html>
+	<head>
+		<title></title>
+		<script type="text/javascript" src="js/chrome_ex_oauthsimple.js"></script>
+		<script type="text/javascript" src="js/chrome_ex_oauth.js"></script>
+		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js/sjcl.js"></script>
+		<script type="text/javascript" src="js/crypto.js"></script>
+		<script type="text/javascript" src="js/test.js"></script>
+	<script>
+
+		$(document).ready(initTestHarness);
+	</script>
+	<link rel="stylesheet" href="css/styles.css" />
+	</head>
+	<body>
+		<div id="container">
+			<h1>Welcome to Crypto Google Docs!!</h1>
+			<a id="linkGenKey" href="javascript:void(0)">Generate Key</a>
+			<input placeholder="Key" id="key" type="text" />
+			<input placeholder="CTR" id="ctr" type="number" />
+			<div>
+				<textarea placeholder="Plaintext" id="pt" type="text"></textarea>
+				<a id="linkEncrypt" href="javascript:void(0)">Encrypt!</a>
+			</div>
+			<div>		
+				<textarea placeholder="Cryptotext" id="ct" type="text"></textarea>
+				<a id="linkDecrypt" href="javascript:void(0)">Decrypt!</a>
+			</div>
+		</div>
+	</body>
+</html>
+

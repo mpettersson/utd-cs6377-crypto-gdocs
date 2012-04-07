@@ -7,12 +7,14 @@ var _crypto = {}
 
 _crypto.random = {};
 
+// This generates a single random integer to use 
 _crypto.random.counter = function(){
 	var rand = new Int32Array(1);
 	window.crypto.getRandomValues(rand);
 	return rand[0];
 }
 
+// This generates a random 128-bit key for use with AES
 _crypto.random.key = function(){
 	var key = new Int32Array(4);
 	window.crypto.getRandomValues(key);
@@ -21,6 +23,8 @@ _crypto.random.key = function(){
 	return keyString;
 }
 
+// This encrypts the specified string using AES and HMAC with the
+// specified key and ctr values.
 _crypto.encrypt = function(keystr,ctr,textstr){	
 
 	var cryptotext = [];
@@ -45,11 +49,10 @@ _crypto.encrypt = function(keystr,ctr,textstr){
 	plaintext.splice(0, 0, aesPadding);
 
 	// Calculate the HMAC
-	var hmac = new sjcl.misc.hmac(key, sjcl.hash.sha256);
-	var hmacResult = hmac.encrypt(plaintext);
+	var hmac= _crypto.generateHMAC(key,plaintext);
 
 	// Concat the result of HMAC onto the end of plaintext to make our cryptosource
-	var cryptosource = plaintext.concat(hmacResult);
+	var cryptosource = plaintext.concat(hmac);
 	
 	// Add the appropriate AES padding on the end of the cryptosource.
 	for (i = 0; i < aesPadding; i++){ cryptosource.push(0); }
@@ -76,6 +79,7 @@ _crypto.encrypt = function(keystr,ctr,textstr){
 	return cryptoresult;
 }
 
+// This function decrypts a message using
 _crypto.decrypt = function(keystr, ctr, cryptostr){	
 
 	var cryptosource = [];
@@ -104,15 +108,14 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 	var aesPadding = cryptosource[0];
 	cryptosource.splice(cryptosource.length - aesPadding);
 	
-	var hmac = new sjcl.misc.hmac(key, sjcl.hash.sha256);
-
-	// Calculate the HMAC and compare it to the included HMAC
+	// Get the included HMAC from the message
 	var hmacMessageResult = cryptosource.splice(cryptosource.length - 8);
-	var hmacResult = hmac.encrypt(cryptosource);
 
-	if (sjcl.codec.base64.fromBits(hmacResult) !== sjcl.codec.base64.fromBits(hmacMessageResult)){
+	// Verify the HMAC
+	if (!_crypto.verifyHMAC(key, hmacMessageResult, cryptosource)){
 		alert('The signature of the message is invalid. Message integrity has been compromised!');
 		return;
+
 	}
 
 	cryptosource.splice(0,1);
@@ -120,3 +123,15 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 	var plaintext = sjcl.codec.utf8String.fromBits(cryptosource);
 	return plaintext;
 }
+
+_crypto.generateHMAC = function(key, data){
+	var hmac = new sjcl.misc.hmac(key, sjcl.hash.sha256);
+	return hmac.encrypt(data)
+}
+
+_crypto.verifyHMAC = function(key, hmacBits, data){
+	var calcString = sjcl.codec.base64.fromBits(this.generateHMAC(key, data));
+	var hmacString = sjcl.codec.base64.fromBits(hmacBits);
+
+	return (calcString === hmacString);
+}	

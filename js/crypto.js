@@ -15,8 +15,8 @@ _crypto.random.counter = function(){
 }
 
 // This generates a random 128-bit key for use with AES
-_crypto.random.key = function(){
-	var key = new Int32Array(4);
+_crypto.random.key = function(len){
+	var key = new Int32Array(len);
 	window.crypto.getRandomValues(key);
 
 	var keyString = sjcl.codec.base64.fromBits(key);

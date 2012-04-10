@@ -29,7 +29,7 @@ function decryptClickHandler(){
 }
 
 function generateKeyClickHandler(){
-	var key = _crypto.random.key();
+	var key = _crypto.random.key(4);
 	$('#key').val(key);
 }
 

@@ -23,6 +23,22 @@ _crypto.random.key = function(len){
 	return keyString;
 }
 
+_crypto.hmac = {};
+
+// This generates an HMAC for a specific message.
+_crypto.hmac.generate = function(key, messageBits){
+	var hmac = new sjcl.misc.hmac(key, sjcl.hash.sha256);
+	return hmac.encrypt(messageBits)
+}
+
+// This verifies an HMAC from a specific message
+_crypto.hmac.verify = function(key, hmacBits, messageBits){
+	var calcString = sjcl.codec.base64.fromBits(_crypto.hmac.generate(key, messageBits));
+	var hmacString = sjcl.codec.base64.fromBits(hmacBits);
+
+	return (calcString === hmacString);
+}
+
 // This encrypts the specified string using AES and HMAC with the
 // specified key and ctr values.
 _crypto.encrypt = function(keystr,ctr,textstr){	
@@ -49,7 +65,7 @@ _crypto.encrypt = function(keystr,ctr,textstr){
 	plaintext.splice(0, 0, aesPadding);
 
 	// Calculate the HMAC
-	var hmac= _crypto.generateHMAC(key,plaintext);
+	var hmac= _crypto.hmac.generate(key,plaintext);
 
 	// Concat the result of HMAC onto the end of plaintext to make our cryptosource
 	var cryptosource = plaintext.concat(hmac);
@@ -112,7 +128,7 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 	var hmacMessageResult = cryptosource.splice(cryptosource.length - 8);
 
 	// Verify the HMAC
-	if (!_crypto.verifyHMAC(key, hmacMessageResult, cryptosource)){
+	if (!_crypto.hmac.verify(key, hmacMessageResult, cryptosource)){
 		alert('The signature of the message is invalid. Message integrity has been compromised!');
 		return;
 
@@ -123,15 +139,4 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 	var plaintext = sjcl.codec.utf8String.fromBits(cryptosource);
 	return plaintext;
 }
-
-_crypto.generateHMAC = function(key, data){
-	var hmac = new sjcl.misc.hmac(key, sjcl.hash.sha256);
-	return hmac.encrypt(data)
-}
-
-_crypto.verifyHMAC = function(key, hmacBits, data){
-	var calcString = sjcl.codec.base64.fromBits(this.generateHMAC(key, data));
-	var hmacString = sjcl.codec.base64.fromBits(hmacBits);
-
-	return (calcString === hmacString);
-}	
+	

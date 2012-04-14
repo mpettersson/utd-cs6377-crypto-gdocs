@@ -5,11 +5,19 @@
 
   },
   "description": "An extension that helps encrypt secret data in Google Docs.",
-  "browser_action": {
-    "default_popup": "popup.html"
-  },
   "background": {
     "page": "background.html"
+  },
+  "content_scripts": [
+	  {
+		  "matches": ["https://docs.google.com/document/*"],
+		  "js": ["js/injected.js"]
+	  }
+  ],
+  "page_action": {
+    "default_icon": "lock.png",
+    "default_title": "Google Docs",  
+	"default_popup": "popup.html" 
   },
   "permissions": [
    	"tabs",
@@ -19,3 +27,5 @@
     "https://www.google.com/accounts/OAuthGetAccessToken"
   ]
 }
+
+  

@@ -1,22 +1,10 @@
 <html>
 	<head>
 		<title></title>
-		<script type="text/javascript" src="js/chrome_ex_oauthsimple.js"></script>
-		<script type="text/javascript" src="js/chrome_ex_oauth.js"></script>
-		<script>
-			var oauth = ChromeExOAuth.initBackgroundPage({
-			  'request_url': 'https://www.google.com/accounts/OAuthGetRequestToken',
-			  'authorize_url': 'https://www.google.com/accounts/OAuthAuthorizeToken',
-			  'access_url': 'https://www.google.com/accounts/OAuthGetAccessToken',
-			  'consumer_key': 'anonymous',
-			  'consumer_secret': 'anonymous',
-			  'scope': 'https://docs.google.com/feeds/',
-			  'app_name': 'CS 6377 Crypto Google Docs'
-			});
-			oauth.authorize(function() {
-  			// ... Ready to fetch private data ...
-			});
-		</script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script type="text/javascript" src="js/third-party/chrome_ex_oauthsimple.js"></script>
+		<script type="text/javascript" src="js/third-party/chrome_ex_oauth.js"></script>
+		<script type="text/javascript" src="js/background.js"></script>
 	</head>
 	<body>
 		

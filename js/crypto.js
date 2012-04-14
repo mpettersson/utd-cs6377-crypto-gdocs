@@ -72,7 +72,7 @@ _crypto.encrypt = function(keystr,ctr,textstr){
 	
 	// Add the appropriate AES padding on the end of the cryptosource.
 	for (i = 0; i < aesPadding; i++){ cryptosource.push(0); }
-	
+
 	// For each group of four blocks in our cryptosource...
 	for (i = 0; i < cryptosource.length; i = i + 4){
 		var blocks = cryptosource.slice(i, i + 4);

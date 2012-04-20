@@ -5,6 +5,13 @@
 
 var _crypto = {}
 
+_crypto.container = function (nonce, alg, message){
+	this._t = 'crypto-gdoc';
+	this.nonce = nonce;
+	this.alg = alg;
+ 	this.payload = message;
+}
+
 _crypto.random = {};
 
 // This generates a single random integer to use 

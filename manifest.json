@@ -16,8 +16,7 @@
   ],
   "page_action": {
     "default_icon": "lock.png",
-    "default_title": "Google Docs",  
-	"default_popup": "popup.html" 
+    "default_title": "Google Docs"
   },
   "permissions": [
    	"tabs",

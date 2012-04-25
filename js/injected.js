@@ -3,8 +3,8 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 	// Don't lose this...
 	// Pq.prototype.send = function(){ };
 
-	var message = request.message;
+	//var message = request.message;
 	
-	$(".kix-zoomdocumentplugin-outer").replaceWith(message);
+	//$(".kix-zoomdocumentplugin-outer").replaceWith(message);
 });
 

@@ -55,12 +55,7 @@ _crypto.encrypt = function(keystr,ctr,textstr){
 	// Convert plaintext to bit array
 	var plaintext = sjcl.codec.utf8String.toBits(textstr);
 	
-	// Workaround to fix issues with 64-bit numbers showing up when converting from utf8 to bits
-	// Essentially, the XOR with 0 flattens everything to 32-bit numbers so HMAC doesn't get angry
-	// https://developer.mozilla.org/en/JavaScript/Reference/Operators/Bitwise_Operators
-	$.each(plaintext, function(idx,itm){
-		plaintext[idx] = itm ^ 0;
-	});
+	_crypto.fixBits(plaintext);
 
 	// Convert the key to bits and initialize AES
 	var key = sjcl.codec.base64.toBits(keystr);
@@ -136,9 +131,7 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 
 	// Verify the HMAC
 	if (!_crypto.hmac.verify(key, hmacMessageResult, cryptosource)){
-		alert('The signature of the message is invalid. Message integrity has been compromised!');
-		return;
-
+		throw new _crypto.HMACError("The HMAC of the message is invalid. Message integrity has been compromised.");
 	}
 
 	cryptosource.splice(0,1);
@@ -146,4 +139,31 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 	var plaintext = sjcl.codec.utf8String.fromBits(cryptosource);
 	return plaintext;
 }
+
+_crypto.sha256 = function(data){
+	var hash = sjcl.hash.sha256.hash(data);
+	return sjcl.codec.utf8String.fromBits(hash);
+}
+
+_crypto.deriveKey = function(password,salt,length){
+	return sjcl.misc.pbkdf2(password, salt, 2000, length)
+}
+
+_crypto.HMACError = function(message){
+	this.name = 'HMACError';
+	this.message = message || 'The HMAC is invalid.'
+}
+
+_crypto.fixBits = function(bitArray){
+
+	// Workaround to fix issues with 64-bit numbers showing up when converting from utf8 to bits
+	// Essentially, the XOR with 0 flattens everything to 32-bit numbers so HMAC doesn't get angry
+	// https://developer.mozilla.org/en/JavaScript/Reference/Operators/Bitwise_Operators
+	$.each(bitArray, function(idx,itm){
+		bitArray[idx] = itm ^ 0;
+	});
+}
+
+_crypto.HMACError.prototype = new Error();
+_crypto.HMACError.constructor = _crypto.HMACError;
 	

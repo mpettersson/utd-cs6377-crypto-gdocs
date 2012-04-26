@@ -142,7 +142,7 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 
 _crypto.sha256 = function(data){
 	var hash = sjcl.hash.sha256.hash(data);
-	return sjcl.codec.utf8String.fromBits(hash);
+	return sjcl.codec.base64.fromBits(hash);
 }
 
 _crypto.deriveKey = function(password,salt,length){

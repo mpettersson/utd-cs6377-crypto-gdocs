@@ -18,15 +18,7 @@ var oauth = ChromeExOAuth.initBackgroundPage({
 });
 
 chrome.extension.onRequest.addListener(receiveMessage);
-chrome.pageAction.onClicked.addListener(function(tab) {
-		// Get the document id
-		var reg = /^https:\/\/docs.google.com\/document\/d\/(.+)\//
-		var result = reg.exec(tab.url);
-		var id = result[1];
-
-		// Get the document
-		gdocs.get_doc(id, 'txt', function(response){ initGetDocCallback(response,id); } );
-});
+chrome.pageAction.onClicked.addListener(urlChangeHandler);
 
 /*
 var masterHash = localStorage.getItem("passwordHash");
@@ -38,6 +30,7 @@ if (masterHash == null){
 	oauth.authorize(init);
 }
 */
+
 oauth.authorize(init);
 
 function launchSetupPage(){
@@ -104,6 +97,16 @@ function launchEditor(id, nonce, alg, pt){
 			documents[tab.id] = {'docId': id, 'nonce': nonce, 'alg': alg};
 			chrome.tabs.sendRequest(tab.id, {message: pt});
 	});
+}
+
+function urlChangeHandler(tab){
+		// Get the document id
+		var reg = /^https:\/\/docs.google.com\/document\/d\/(.+)\//
+		var result = reg.exec(tab.url);
+		var id = result[1];
+
+		// Get the document
+		gdocs.get_doc(id, 'txt', function(response){ initGetDocCallback(response,id); } );
 }
 
 //Elliptic curves over reals

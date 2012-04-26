@@ -18,6 +18,15 @@ var oauth = ChromeExOAuth.initBackgroundPage({
 });
 
 chrome.extension.onRequest.addListener(receiveMessage);
+chrome.pageAction.onClicked.addListener(function(tab) {
+		// Get the document id
+		var reg = /^https:\/\/docs.google.com\/document\/d\/(.+)\//
+		var result = reg.exec(tab.url);
+		var id = result[1];
+
+		// Get the document
+		gdocs.get_doc(id, 'txt', function(response){ initGetDocCallback(response,id); } );
+});
 
 /*
 var masterHash = localStorage.getItem("passwordHash");
@@ -50,51 +59,51 @@ function initializeCryptoDocs(tabId, url){
 
 	// Show the icon
 	chrome.pageAction.show(tabId);
-	
-	chrome.pageAction.onClicked.addListener(function(tab) {
-		// Get the document id
-		var reg = /^https:\/\/docs.google.com\/document\/d\/(.+)\//
-		var result = reg.exec(url);
-		var id = result[1];
-
-		// Get the document
-		gdocs.get_doc(id, 'txt', function(response){ initGetDocCallback(response,id); } );
-	});
 }
 
 function initGetDocCallback(response, id){
-	try {
-		// If we have valid JSON
-   		var resp = JSON.parse(response);
+	if (response != ""){	
+		try {
+			// If we have valid JSON
+	   		var resp = JSON.parse(response);
 		
-		if (resp._t === 'crypto-gdoc'){
-			// Check to see if we generated the JSON, if so... decrypt it.
-			try{
-				var pt = _crypto.decrypt(testkey, resp.nonce, resp.payload);
-				
-				chrome.tabs.create({url: chrome.extension.getURL('editor.html')}, function(tab){
-					// Let the content script know that we have done so by passing the plaintext to it.
-					documents[tab.id] = {docId: id, nextNonce: resp.nonce + 1, alg: resp.alg};
-					chrome.tabs.sendRequest(tab.id, {message: pt});
-				});
-			} catch (ex){
-				if (ex instanceof _crypto.HMACError){
-					alert(ex);
-				}else{
-					throw ex;				
-				}
-			};		
+			if (resp._t === 'crypto-gdoc'){
+				// Check to see if we generated the JSON, if so... decrypt it.
+				try{
+					var pt = _crypto.decrypt(testkey, resp.nonce, resp.payload);
+					
+					launchEditor(id, resp.nonce, resp.alg, pt);
+
+				} catch (ex){
+					if (ex instanceof _crypto.HMACError){
+						alert(ex);
+					}else{
+						throw ex;				
+					}
+				};		
 	
 				
-		}else{
-			console.log('Not mine!');		
+			}else{
+				console.log('Not mine!');		
+			}
+		
 		}
+		catch (ex) {
+			// Otherwise...
+			alert('This document does not appear to be a crypto doc. If you are trying to create a new crypto doc, remember that only blank documents can be used to create a new crypto doc.');
+		}
+	}else{
+		launchEditor(id,null, 1, pt);
 		
 	}
-	catch (ex) {
-		// Otherwise...
-		console.log('BAD JSON!');   
-	}
+}
+
+function launchEditor(id, nonce, alg, pt){
+	chrome.tabs.create({url: chrome.extension.getURL('editor.html')}, function(tab){
+			// Let the content script know that we have done so by passing the plaintext to it.
+			documents[tab.id] = {'docId': id, 'nonce': nonce, 'alg': alg};
+			chrome.tabs.sendRequest(tab.id, {message: pt});
+	});
 }
 
 //Elliptic curves over reals
@@ -111,9 +120,16 @@ function processSaveMessage(request,sender, sendResponse){
 	var docInfo = documents[sender.tab.id];
 
 	var pt = request.content;
-	ct = _crypto.encrypt(testkey, docInfo.nextNonce, pt);	
+	var nextNonce = (docInfo.nonce + 1) || _crypto.random.counter();
 
-	var obj = new _crypto.container(docInfo.nextNonce,request.alg || docInfo.alg,ct);
+	ct = _crypto.encrypt(testkey, nextNonce, pt);
+
+	var obj = new _crypto.container(
+		nextNonce,
+		docInfo.alg,
+		ct
+	);
+
 	gdocs.update_doc(docInfo.docId, JSON.stringify(obj), function(){
 		chrome.tabs.remove(sender.tab.id);
 	});

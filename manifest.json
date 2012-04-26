@@ -16,7 +16,7 @@
   ],
   "page_action": {
     "default_icon": "lock.png",
-    "default_title": "Google Docs"
+    "default_title": "Open as Crypto Google Doc"
   },
   "permissions": [
    	"tabs",

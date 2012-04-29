@@ -6,7 +6,14 @@
 var _crypto = {}
 
 _crypto.container = function (nonce, alg, message){
-	this._t = 'crypto-gdoc';
+	this._t = 'crypto-gdoc-doc';
+	this.nonce = nonce;
+	this.alg = alg;
+ 	this.payload = message;
+}
+
+_crypto.key_container = function (nonce, alg, message){
+	this._t = 'crypto-gdoc-key';
 	this.nonce = nonce;
 	this.alg = alg;
  	this.payload = message;
@@ -48,12 +55,13 @@ _crypto.hmac.verify = function(key, hmacBits, messageBits){
 
 // This encrypts the specified string using AES and HMAC with the
 // specified key and ctr values.
-_crypto.encrypt = function(keystr,ctr,textstr){	
+_crypto.encrypt = function(keystr,ctr,textstr, base64){	
+	base64 = base64 || false;
 
 	var cryptotext = [];
 
 	// Convert plaintext to bit array
-	var plaintext = sjcl.codec.utf8String.toBits(textstr);
+	var plaintext = (!base64) ? sjcl.codec.utf8String.toBits(textstr) : sjcl.codec.base64.toBits(textstr);
 	
 	_crypto.fixBits(plaintext);
 
@@ -98,8 +106,8 @@ _crypto.encrypt = function(keystr,ctr,textstr){
 }
 
 // This function decrypts a message using
-_crypto.decrypt = function(keystr, ctr, cryptostr){	
-
+_crypto.decrypt = function(keystr, ctr, cryptostr, base64){	
+	base64 = base64 || false;
 	var cryptosource = [];
 
 	// Convert plain text and key to bit arrays
@@ -136,7 +144,7 @@ _crypto.decrypt = function(keystr, ctr, cryptostr){
 
 	cryptosource.splice(0,1);
 
-	var plaintext = sjcl.codec.utf8String.fromBits(cryptosource);
+	var plaintext = (!base64) ? sjcl.codec.utf8String.fromBits(cryptosource) : sjcl.codec.base64.fromBits(cryptosource);
 	return plaintext;
 }
 
@@ -146,7 +154,7 @@ _crypto.sha256 = function(data){
 }
 
 _crypto.deriveKey = function(password,salt,length){
-	return sjcl.misc.pbkdf2(password, salt, 2000, length)
+	return sjcl.codec.base64.fromBits(sjcl.misc.pbkdf2(password, salt, 2000, length || (4 * 32)));
 }
 
 _crypto.HMACError = function(message){

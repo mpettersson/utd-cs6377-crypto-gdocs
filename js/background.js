@@ -1,7 +1,8 @@
-function init(){
-	chrome.extension.onRequest.addListener(receiveMessage);
-	chrome.pageAction.onClicked.addListener(urlChangeHandler);
-
+function init(again){
+	if (!again){
+		chrome.extension.onRequest.addListener(receiveMessage);
+		chrome.pageAction.onClicked.addListener(urlChangeHandler);
+	}
 
 	var keys = new KeyManager();
 
@@ -127,8 +128,17 @@ function receiveMessage(request, sender, sendResponse){
 		processSaveMessage(request,sender,sendResponse);
 	}else if (request.type === 'save_setup'){
 		processSetupMessage(request, sender, sendResponse);
+	}else if (request.type === 'reset'){
+		processResetMessage(request,sender,sendResponse);
+		
 	}		
 
+}
+function processResetMessage(request,sender, sendResponse){
+	localStorage.clear();
+	documents = {};
+	chrome.tabs.remove(sender.tab.id);
+	init(true);
 }
 
 function processSaveMessage(request,sender, sendResponse){
@@ -147,6 +157,7 @@ function processSaveMessage(request,sender, sendResponse){
 
 	gdocs.update_doc(docInfo.docId, JSON.stringify(obj), function(){
 		chrome.tabs.remove(sender.tab.id);
+		delete documents[sender.tab.id];
 	});
 }
 

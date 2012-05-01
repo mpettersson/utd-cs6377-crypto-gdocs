@@ -14,17 +14,24 @@
 	<body>
 		
 		<div id="container">
-			<h1>Welcome to Crypto Google Docs Setup!</h1>
-			<div id="oldPassContainer">
-				<p>Please enter your old password.</p>
-				<input id="oldPassword" type="password" />
-			</div>
-			<div>
-				<p>Please select a master password</p>
-				<input id="password" type="password" />
-				<p>Please confirm your master password</p>
-				<input id="passwordConfirm" type="password" />
-			</div>
+			<h1>Crypto Google Docs Options</h1>
+			<fieldset>
+				<legend>Master Password</legend>			
+				<div id="oldPassContainer">
+					<p>Please enter your old password.</p>
+					<input id="oldPassword" type="password" />
+				</div>
+				<div>
+					<p>Please select a master password</p>
+					<input id="password" type="password" />
+					<p>Please confirm your master password</p>
+					<input id="passwordConfirm" type="password" />
+				</div>
+			</fieldset>
+			<fieldset id="resetContainer">
+				<legend>Data Reset</legend>
+				<input id="resetButton" type="button" value="Erase ALL Local Crypto Google Docs Data!!!" />
+			</fieldset>	
 		</div>
 		<input id="saveButton" type="button" value="Save">
 	</body>

@@ -3,8 +3,10 @@ function init(){
 	var hash = location.hash;
 	if (hash == '#new'){
 		$('#oldPassContainer').hide();
+		$('#resetContainer').hide();
 	}
 	$('#saveButton').click(saveHandler);
+	$('#resetButton').click(resetHandler);
 }
 
 function saveHandler(){
@@ -25,4 +27,10 @@ function saveHandler(){
 		alert('Your passwords do not match.');	
 	}
 	
+}
+
+function resetHandler(){
+	if (window.confirm('Warning!!! This will delete all of your local encryption keys. You may not be able to recover encrypted documents if you do not have extra copies of your keys.')){
+		chrome.extension.sendRequest({'type': 'reset'});
+	}
 }

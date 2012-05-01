@@ -20,6 +20,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			evt.preventDefault();
 			sendResponse($(field).val());
 			$(overlay).remove();
+			$(background).remove();
 		});
 		
 		var background = document.createElement('div');
@@ -41,6 +42,8 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			at: "top",
 			of: "#docs-editor-container"
 		});	
+
+		$(field).focus();
 		
 	}
 });

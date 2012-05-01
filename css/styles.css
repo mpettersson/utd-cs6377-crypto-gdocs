@@ -5,3 +5,26 @@
 #container.editor{
 	width: 100%;
 }
+
+.overlayPopup {
+	min-height: 300px;
+	width: 500px;
+	background: white;
+	border: solid black thin;
+	-webkit-box-shadow: 0 4px 10px #8B8B8B;
+	-moz-box-shadow: 0 4px 10px #8b8b8b;
+	box-shadow: 0 4px 10px #8B8B8B;
+	padding: 40px;
+	border-radius: 10px;
+	z-index: 9000;
+}
+
+.overlayBackground {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+	opacity: 0.8;
+	z-index: 8999;
+	top: 0;
+}

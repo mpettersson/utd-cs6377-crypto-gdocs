@@ -11,7 +11,8 @@
   "content_scripts": [
 	  {
 		  "matches": ["https://docs.google.com/document/*"],
-		  "js": ["js/third-party/jquery-1.7.2.min.js","js/injected.js"]
+		  "js": ["js/third-party/jquery-1.7.2.min.js","js/third-party/jquery-ui-1.8.20-position.min.js","js/injected.js"],
+		  "css": ["css/styles.css"]
 	  }
   ],
   "options_page": "setup.html",

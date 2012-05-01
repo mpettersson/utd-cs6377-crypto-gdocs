@@ -101,22 +101,24 @@ function urlChangeHandler(tab){
 		var result = reg.exec(tab.url);
 		var id = result[1];
 
-		var result = window.prompt('Please enter your Crypto Google Docs password.');
+		chrome.tabs.sendRequest(tab.id, {'type': 'get_password'}, function(response){
+			if (!result){
+				return;
+			}
+
+			var keys = new KeyManager();
+			keys.setCurrentPassword(response);
+
+			if (!keys.verifyPassword()){
+				alert('Incorrect password!');
+				return;
+			}
+
+			// Get the document
+			gdocs.get_doc(id, 'txt', function(response){ initGetDocCallback(response,id, keys); } );
+		});
 		
-		if (!result){
-			return;
-		}
-
-		var keys = new KeyManager();
-		keys.setCurrentPassword(result);
-
-		if (!keys.verifyPassword()){
-			alert('Incorrect password!');
-			return;
-		}
-
-		// Get the document
-		gdocs.get_doc(id, 'txt', function(response){ initGetDocCallback(response,id, keys); } );
+		
 }
 
 //Elliptic curves over reals

@@ -157,9 +157,8 @@ _crypto.deriveKey = function(password,salt,length){
 	return sjcl.codec.base64.fromBits(sjcl.misc.pbkdf2(password, salt, 2000, length || (4 * 32)));
 }
 
-_crypto.HMACError = function(message){
-	this.name = 'HMACError';
-	this.message = message || 'The HMAC is invalid.'
+_crypto.countBlocks = function(str){
+	return sjcl.codec.base64.toBits(str).length;
 }
 
 _crypto.fixBits = function(bitArray){
@@ -170,6 +169,11 @@ _crypto.fixBits = function(bitArray){
 	$.each(bitArray, function(idx,itm){
 		bitArray[idx] = itm ^ 0;
 	});
+}
+
+_crypto.HMACError = function(message){
+	this.name = 'HMACError';
+	this.message = message || 'The HMAC is invalid.'
 }
 
 _crypto.HMACError.prototype = new Error();

@@ -14,7 +14,7 @@ function init(){
 }
 
 function launchSetupPage(){
-	chrome.tabs.create({url: chrome.extension.getURL('setup.html')});
+	chrome.tabs.create({url: chrome.extension.getURL('setup.html') + '#new'});
 }
 
 function init_extension(){
@@ -53,9 +53,12 @@ function initGetDocCallback(response, id, keys){
 
 						keys.setDocumentKey(id, key);
 					}
+
+					var numBlocks = _crypto.countBlocks(resp.payload);
+
 					var pt = _crypto.decrypt(key, resp.nonce, resp.payload);
 					
-					launchEditor(id, resp.nonce, resp.alg, pt, key);
+					launchEditor(id, resp.nonce + numBlocks, resp.alg, pt, key);
 
 				} catch (ex){
 					if (ex instanceof _crypto.HMACError){
@@ -88,7 +91,7 @@ function launchEditor(id, nonce, alg, pt, key){
 	chrome.tabs.create({url: chrome.extension.getURL('editor.html')}, function(tab){
 			// Let the content script know that we have done so by passing the plaintext to it.
 			documents[tab.id] = {'docId': id, 'nonce': nonce, 'alg': alg, 'key': key};
-			chrome.tabs.sendRequest(tab.id, {message: pt});
+			chrome.tabs.sendRequest(tab.id, {'message': pt, 'key': key});
 	});
 }
 
@@ -130,7 +133,7 @@ function processSaveMessage(request,sender, sendResponse){
 	var docInfo = documents[sender.tab.id];
 
 	var pt = request.content;
-	var nextNonce = docInfo.nonce ? (docInfo.nonce + 1) : _crypto.random.counter();
+	var nextNonce = docInfo.nonce || _crypto.random.counter();
 
 	ct = _crypto.encrypt(docInfo.key, nextNonce, pt);
 
@@ -147,8 +150,18 @@ function processSaveMessage(request,sender, sendResponse){
 
 function processSetupMessage(request, sender, sendResponse){
 	var keymanager = new KeyManager();
+	
+	if (request.oldPassword){
+		keymanager.setCurrentPassword(request.oldPassword);
+		if (!keymanager.verifyPassword()){
+			sendResponse(false);
+			return;
+		}
+	}
+	
 	keymanager.changePassword(request.password);
 	oauth.authorize(init_extension);
+	chrome.tabs.remove(sender.tab.id);
 }
 
 // Let's go!

@@ -27,7 +27,7 @@ KeyManager.prototype.verifyPassword = function(password){
 }
 
 // Changes the password that protects the master key
-// Also sets current password to be the new passwor
+// Also sets current password to be the new password
 KeyManager.prototype.changePassword = function(newpass){
 	var newSalt = _crypto.random.key(4);
 	var newHash = _crypto.sha256(newpass + newSalt);
@@ -72,7 +72,6 @@ KeyManager.prototype.getMasterKey = function(){
 // Set the key used by a particular document
 KeyManager.prototype.setDocumentKey = function(docId, key){
 	var ctr = _crypto.random.counter();
-	var masterkey = this.getMasterKey();
 	var encrypted = _crypto.encrypt(this.getMasterKey(), ctr, key, true);
 	var container = new _crypto.key_container(ctr, 1, encrypted);
 
